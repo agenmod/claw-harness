@@ -33,6 +33,9 @@ import { SkillTool } from './tools/SkillTool.js'
 import { EnterWorktreeTool, ExitWorktreeTool } from './tools/WorktreeTool.js'
 import { loadConfig, loadProjectFiles } from './config/settings.js'
 import { extractAndSaveMemories, loadMemories } from './services/memory/AutoMemory.js'
+import { printBanner } from './ui/banner.js'
+import { Spinner, getToolIcon } from './ui/spinner.js'
+import { formatToolStart, formatToolSuccess, formatToolError, formatCompressed, formatCost, highlightCodeBlocks, c } from './ui/format.js'
 import type { ModelProvider } from './providers/ModelProvider.js'
 import type { AppConfig, ProviderConfig } from './core/types.js'
 
@@ -146,14 +149,20 @@ function main() {
   }
 
   // ── Banner ──
-  console.log(`\x1b[36m◆ ClawHarness v0.1\x1b[0m  model: \x1b[33m${currentProviderCfg.model}\x1b[0m  via ${currentProviderName}  mode: ${permMode}`)
-  console.log(`  cwd: ${cwd}  tools: ${tools.all().length}${isGit ? '  git: yes' : ''}`)
-  console.log(`  Available providers: ${Object.keys(config.providers).join(', ')}`)
-  console.log(`  /help for commands\n`)
+  printBanner({
+    version: '0.1.0',
+    model: currentProviderCfg.model,
+    provider: currentProviderName,
+    mode: permMode,
+    cwd,
+    toolCount: tools.all().length,
+    isGit,
+    compact: !!oneshot,
+  })
 
   if (oneshot) { runOnce(engine, oneshot, cwd, verboseFlag).then(() => process.exit(0)); return }
 
-  const rl = createInterface({ input: process.stdin, output: process.stdout, prompt: '\x1b[36m❯\x1b[0m ' })
+  const rl = createInterface({ input: process.stdin, output: process.stdout, prompt: '\x1b[38;5;208m🦞\x1b[0m ' })
   rl.prompt()
   rl.on('line', async line => {
     const input = line.trim()
@@ -278,39 +287,80 @@ function handleSlash(cmd: string, cwd: string, perm: PermissionSystem, tools: To
 }
 
 async function runOnce(eng: AgentEngine, input: string, cwd: string, verbose: boolean) {
+  const spinner = new Spinner()
+  let textBuffer = ''
+  let activeToolName = ''
+
   for await (const ev of eng.run(input)) {
     switch (ev.type) {
-      case 'text': process.stdout.write(ev.content); break
-      case 'thinking': if (verbose) process.stdout.write(`\x1b[90m💭 ${ev.content}\x1b[0m`); break
+      case 'text':
+        textBuffer += ev.content
+        process.stdout.write(ev.content)
+        break
+
+      case 'thinking':
+        if (verbose) process.stdout.write(`${c.dim}💭 ${ev.content}${c.reset}`)
+        break
+
       case 'tool_start': {
-        process.stdout.write(`\n\x1b[90m⚙ ${ev.call.name}`)
+        // Flush any text before tool call
+        if (textBuffer) { textBuffer = ''; process.stdout.write('\n') }
+
+        const icon = getToolIcon(ev.call.name)
         const inp = ev.call.input
-        if (ev.call.name === 'Bash') process.stdout.write(`: ${String(inp.command ?? '').slice(0, 120)}`)
-        else if (inp.path) process.stdout.write(`: ${inp.path}`)
-        else if (inp.pattern) process.stdout.write(`: ${inp.pattern}`)
-        else if (inp.url) process.stdout.write(`: ${String(inp.url).slice(0, 80)}`)
-        else if (inp.query) process.stdout.write(`: ${String(inp.query).slice(0, 80)}`)
-        else if (inp.task) process.stdout.write(`: ${String(inp.task).slice(0, 80)}`)
-        else if (inp.question) process.stdout.write(`: ${String(inp.question).slice(0, 80)}`)
-        process.stdout.write('\x1b[0m\n')
+        let detail = ''
+        if (ev.call.name === 'Bash') detail = String(inp.command ?? '').slice(0, 100)
+        else if (inp.path) detail = String(inp.path)
+        else if (inp.pattern) detail = String(inp.pattern)
+        else if (inp.url) detail = String(inp.url).slice(0, 60)
+        else if (inp.query) detail = String(inp.query).slice(0, 60)
+        else if (inp.task) detail = String(inp.task).slice(0, 60)
+        else if (inp.question) detail = String(inp.question).slice(0, 60)
+
+        console.log(formatToolStart(ev.call.name, icon, detail))
+        activeToolName = ev.call.name
+        spinner.start(`${ev.call.name} running...`)
         break
       }
-      case 'tool_done':
-        if (ev.isError) process.stderr.write(`\x1b[31m  ✗ ${ev.output.slice(0, 400)}\x1b[0m\n`)
-        else process.stdout.write(`\x1b[32m  ✓\x1b[0m \x1b[90m${ev.output.replace(/\n/g, ' ').slice(0, 180)}${ev.output.length > 180 ? '…' : ''}\x1b[0m\n`)
+
+      case 'tool_done': {
+        spinner.stop()
+        if (ev.isError) {
+          console.log(formatToolError(ev.output.slice(0, 400)))
+        } else {
+          const preview = ev.output.replace(/\n/g, ' ').slice(0, 160)
+          console.log(formatToolSuccess(preview + (ev.output.length > 160 ? '…' : '')))
+        }
+        activeToolName = ''
         break
+      }
+
       case 'compressed':
-        process.stderr.write(`\x1b[90m  ♻ Compressed: ${ev.fromMessages}→${ev.toMessages} msgs\x1b[0m\n`)
+        spinner.stop()
+        console.log(formatCompressed(ev.fromMessages, ev.toMessages))
         break
-      case 'finished':
+
+      case 'finished': {
+        spinner.stop()
+        // Apply code highlighting to accumulated text
+        if (textBuffer.includes('```')) {
+          // Already printed raw, but future: buffer and highlight
+        }
         process.stdout.write('\n')
-        if (verbose && ev.usage) process.stderr.write(`\x1b[90m  ${costTracker.format()}\x1b[0m\n`)
+        if (verbose && ev.usage) {
+          console.log(formatCost(costTracker.format()))
+        }
         break
-      case 'error': process.stderr.write(`\x1b[31m✗ ${ev.message}\x1b[0m\n`); break
+      }
+
+      case 'error':
+        spinner.stop()
+        console.error(`\n  ${c.red}${c.bold}✗ Error:${c.reset} ${c.red}${ev.message}${c.reset}`)
+        break
     }
   }
+
   try { saveSession(cwd, [...eng.getMessages()]) } catch {}
-  // Auto-extract memories in background (don't block)
   extractAndSaveMemories([...eng.getMessages()], currentProvider, cwd.split('/').pop()).catch(() => {})
 }
 

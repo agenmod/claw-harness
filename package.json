@@ -5,8 +5,8 @@
   "license": "MIT",
   "type": "module",
   "bin": {
-    "clawharness": "./dist/index.js",
-    "clh": "./dist/index.js"
+    "clawharness": "./bin/clh.js",
+    "clh": "./bin/clh.js"
   },
   "scripts": {
     "dev": "tsx src/index.ts",

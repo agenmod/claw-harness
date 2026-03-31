@@ -1,0 +1,26 @@
+{
+  "name": "clawharness",
+  "version": "0.1.0",
+  "description": "The open-source Claude Code alternative that works with ANY model. Drop-in replacement with multi-model support.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "clawharness": "./dist/index.js",
+    "clh": "./dist/index.js"
+  },
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "engines": { "node": ">=18.0.0" },
+  "dependencies": {
+    "openai": "^4.80.0",
+    "glob": "^11.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "tsx": "^4.19.0",
+    "@types/node": "^22.0.0"
+  }
+}

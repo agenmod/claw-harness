@@ -225,22 +225,19 @@ ClawHarness implements the core patterns that make Claude Code effective:
 
 When you combine a strong model (DeepSeek-R1 for reasoning) with this harness layer, you get **remarkably close to Claude Code's Opus-tier output** — at a fraction of the cost.
 
-## Use with claw-code / Open Claw
+## Use with Open Claw 🦞
 
-Already using [claw-code](https://github.com/instructkr/claw-code)? ClawHarness is designed to **supercharge it**.
-
-claw-code mirrors the Claude Code architecture but stays locked to one model. ClawHarness provides the **missing multi-model layer** — drop it in and unlock:
+ClawHarness is built for the **Open Claw ecosystem**. It provides the **multi-model engine layer** that the community needs:
 
 - **Any model** — swap Anthropic for DeepSeek, Doubao, Qwen, or local models
 - **Smart routing** — auto-route hard/easy tasks to strong/cheap models
-- **Real tool execution** — 22 tools that actually run (not stubs)
-- **Production security** — 1,030 lines of command analysis, not regex
+- **Real tool execution** — 22 tools that actually run, not stubs
+- **Production security** — 1,030 lines of command analysis
 - **Context compression** — 5 strategies so long sessions don't break
 
-ClawHarness works standalone **or** as the engine layer for any Claude Code-derived project. If you've forked claw-code, this is the upgrade that makes it actually useful with non-Anthropic models.
+Works **standalone** or as the engine layer for any Open Claw project. If you're building on the open-source Claude Code harness ecosystem, this is the multi-model upgrade.
 
 ```bash
-# Works standalone — no claw-code dependency needed
 npm install && DEEPSEEK_API_KEY=sk-xxx npx tsx src/index.ts
 ```
 

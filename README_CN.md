@@ -101,22 +101,19 @@ npx tsx src/index.ts
 5. **记忆持续** — 自动提取每次会话的经验，下次启动加载
 6. **模型无关** — 换大脑不用换框架。今天最强的模型不一定是明天的
 
-## 配合 claw-code / Open Claw 使用
+## 配合 Open Claw 🦞 生态使用
 
-已经在用 [claw-code](https://github.com/instructkr/claw-code)？ClawHarness 就是它的 **多模型增强层**。
+ClawHarness 是为 **Open Claw 生态** 打造的多模型引擎层：
 
-claw-code 复刻了 Claude Code 的架构，但锁死一个模型。ClawHarness 提供 **缺失的多模型能力**：
-
-- **任意模型** — 把 Anthropic 换成 DeepSeek、豆包、通义、或本地模型
-- **智能路由** — 自动把难/简单任务分配到强/弱模型
+- **任意模型** — DeepSeek、豆包、通义、本地模型随便接
+- **智能路由** — 难任务→强模型，简单→便宜模型，自动分配
 - **真正能执行的工具** — 22 个工具不是空壳
-- **生产级安全** — 1,030 行命令分析，不是正则匹配
+- **生产级安全** — 1,030 行命令分析
 - **上下文压缩** — 5 种策略，长对话不崩
 
-ClawHarness 可以 **独立使用**，也可以作为任何 Claude Code 衍生项目的引擎层。如果你 fork 了 claw-code，这就是让它真正能用非 Anthropic 模型的升级。
+可以 **独立使用**，也可以作为 Open Claw 生态里任何项目的引擎层。
 
 ```bash
-# 独立使用，不需要 claw-code
 npm install && DEEPSEEK_API_KEY=sk-xxx npx tsx src/index.ts
 ```
 

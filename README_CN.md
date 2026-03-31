@@ -2,9 +2,9 @@
 
 # 🦞 ClawHarness
 
-### 最强开源 Claude Code 工程框架 — 接任何模型
+### 让便宜模型也能接近 Claude Code Opus 的表现
 
-**5,479 行代码 · 22 个工具 · 智能路由 · 任意 LLM API**
+**从 Claude Code 泄漏源码中逆向工程——接任何模型，获得顶级 Agent 能力**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
@@ -12,18 +12,51 @@
 
 ---
 
-*Claude Code 每月 $100+，只能用 Anthropic 的模型。*
-*如果你能用同样的 Agent 工程——接 DeepSeek、豆包、通义、或任何你想用的模型呢？*
+*2026 年 3 月 31 日，Claude Code 完整源码通过 npm source map 泄漏——515,000 行 TypeScript。*
 
-*这就是 ClawHarness。*
+*我们逆向了让它强大的每一个机制：Agent 循环、上下文压缩、工具编排、安全层、Prompt 工程——重建为开放框架。*
+
+*现在你可以接 DeepSeek、豆包、通义、或任何便宜模型——框架会帮你把它的表现拉到尽可能接近 Claude Code Opus 的水平。*
 
 </div>
 
 ## 这是什么？
 
-ClawHarness 是一个**生产级 AI 编程 Agent**，复刻并扩展了 Claude Code 的核心工程——`while(tool_call)` 循环、上下文压缩、工具编排、安全层等——但**不绑定任何模型提供商**。
+用 Claude Code 的时候，**模型只是故事的一半**。另一半是模型外面那层工程——harness（框架）：
 
-接 DeepSeek，每百万 token ¥1。接 GPT-4o。接本地 Llama。框架不关心你用什么模型。**同样的 Agent 智能，你选大脑。**
+- 怎么决定调哪个工具、什么顺序
+- 怎么压缩上下文让对话永远不会崩
+- 怎么从错误、截断、限流中恢复
+- 怎么验证 Shell 命令防止搞破坏
+- Prompt 怎么用 100+ 条件动态拼装
+
+**这层框架才是让 Opus 表现像 Opus 的关键。** 没有它，再好的模型也只是个聊天机器人。
+
+ClawHarness **把这层框架给了任何模型**。当你用一个强但便宜的模型（DeepSeek，¥1/百万 token）+ 生产级的 Agent 工程，你能得到 **非常接近 Claude Code 顶配档的输出**——1/10 的价格。
+
+这不是理论。每个机制都是从实际泄漏的 Claude Code 源码中逆向出来的：
+
+| Claude Code 机制 | ClawHarness 实现 |
+|---|---|
+| `while(tool_call)` Agent 循环 | ✅ 完整状态机，6 种转换类型 |
+| 4 种上下文压缩 | ✅ 5 种（micro, snip, group, auto, reactive） |
+| 10,000 行 Bash 安全系统 | ✅ 1,030 行：130+ 命令语义库 + 路径沙箱 + 只读验证 |
+| Prompt 缓存分界 (`__DYNAMIC_BOUNDARY__`) | ✅ 静态/动态 Prompt 分层 |
+| 工具编排（读并发、写串行） | ✅ 自动分区 |
+| max_output_tokens 截断恢复 | ✅ 自动续写 |
+| 413 上下文过长恢复 | ✅ 紧急压缩 + 重试 |
+| 子 Agent 生成 | ✅ 独立上下文隔离 |
+| CLAUDE.md 项目指令 | ✅ 多级 HARNESS.md（全局→项目→目录） |
+| 会话记忆 | ✅ 自动提取经验，下次加载 |
+
+**加上 Claude Code 没有的：**
+
+| 能力 | Claude Code | ClawHarness |
+|---|---|---|
+| 多模型支持 | ❌ 只有 Anthropic | ✅ 任意 OpenAI 兼容 API |
+| 智能路由 | ❌ | ✅ 难任务→强模型，简单→便宜 |
+| 开源 | ❌ | ✅ MIT |
+| 月费 | $100+ | **¥30-100** |
 
 ### 杀手级功能：智能模型路由
 
@@ -101,20 +134,24 @@ npx tsx src/index.ts
 5. **记忆持续** — 自动提取每次会话的经验，下次启动加载
 6. **模型无关** — 换大脑不用换框架。今天最强的模型不一定是明天的
 
-## 配合 Open Claw 🦞 生态使用
+## Open Claw 🦞 核心框架
 
-ClawHarness 是为 **Open Claw 生态** 打造的多模型引擎层：
+ClawHarness 是 **Open Claw 生态的核心 harness** — 设计目标是：当你接便宜模型时，框架层会把它的表现拉到尽可能接近 Claude Code Opus。
 
-- **任意模型** — DeepSeek、豆包、通义、本地模型随便接
-- **智能路由** — 难任务→强模型，简单→便宜模型，自动分配
-- **真正能执行的工具** — 22 个工具不是空壳
-- **生产级安全** — 1,030 行命令分析
-- **上下文压缩** — 5 种策略，长对话不崩
+框架怎么弥补弱模型：
 
-可以 **独立使用**，也可以作为 Open Claw 生态里任何项目的引擎层。
+1. **更好的 Prompt 工程** — 224 行精心设计的系统提示词，每个工具有专门的行为引导
+2. **更聪明的工具编排** — 只读工具并行、写入串行、大结果自动存磁盘
+3. **上下文永不死** — 5 种压缩策略自动介入，100+ 轮对话也不崩
+4. **错误自动恢复** — 截断自动续写、413 紧急压缩、工具失败重试
+5. **智能路由** — 最难的 20% 任务走强模型，简单的 80% 走便宜模型
+
+**框架越强，模型越不重要。** 这就是核心思路。
 
 ```bash
-npm install && DEEPSEEK_API_KEY=sk-xxx npx tsx src/index.ts
+# 强模型 + 便宜模型 = 最佳组合
+DEEPSEEK_API_KEY=sk-xxx DOUBAO_API_KEY=yyy \
+  npx tsx src/index.ts --model=deepseek --router=doubao
 ```
 
 ## 许可

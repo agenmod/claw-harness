@@ -2,9 +2,9 @@
 
 # 🦞 ClawHarness
 
-### The most capable open-source Claude Code harness — now with ANY model
+### Make cheap models perform like Claude Code Opus
 
-**5,479 lines · 22 tools · smart routing · any LLM API**
+**The harness layer reverse-engineered from the Claude Code leak — plug in any model, get top-tier agent capability**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
@@ -12,18 +12,51 @@
 
 ---
 
-*Claude Code costs $100+/month and locks you to one provider.*
-*What if you could get the same agent engineering — with DeepSeek, Doubao, Qwen, or any model you want?*
+*On March 31, 2026, Claude Code's full source leaked via npm source maps — 515,000 lines of TypeScript.*
 
-*That's ClawHarness.*
+*We reverse-engineered every mechanism that makes it good: the agent loop, context compression, tool orchestration, security layer, prompt engineering — and rebuilt it as an open harness.*
+
+*Now you can plug in DeepSeek, Doubao, Qwen, or any cheap model — and the harness does the heavy lifting to make it perform like Claude Code's Opus tier.*
 
 </div>
 
 ## What is this?
 
-ClawHarness is a **production-grade AI coding agent** that replicates and extends the core engineering of Claude Code's agent harness — the `while(tool_call)` loop, context compression, tool orchestration, security layer, and more — but **decoupled from any single model provider**.
+When you use Claude Code, **the model is only half the story**. The other half is the engineering around it — the harness:
 
-Plug in DeepSeek for $0.14/M tokens. Plug in GPT-4o. Plug in a local Llama. The harness doesn't care. **Same agent intelligence, your choice of brain.**
+- How it decides which tools to call and in what order
+- How it compresses context so conversations never break
+- How it recovers from errors, truncation, and rate limits
+- How it validates shell commands to prevent damage
+- How the prompt is engineered with 100+ conditional sections
+
+**That harness is what makes Opus feel like Opus.** Without it, even the best model is just a chatbot.
+
+ClawHarness **gives that same harness to any model**. When you pair a strong-but-cheap model (DeepSeek at $0.14/M tokens) with production-grade agent engineering, you get **remarkably close to Claude Code's top-tier output** — at 1/10th the price.
+
+This isn't theory. Every mechanism was reverse-engineered from the actual leaked Claude Code source:
+
+| Claude Code mechanism | ClawHarness implementation |
+|---|---|
+| `while(tool_call)` agent loop | ✅ Full state machine with 6 transition types |
+| 4 context compression strategies | ✅ 5 strategies (micro, snip, group, auto, reactive) |
+| 10,000-line Bash security system | ✅ 1,030 lines: command semantics DB (130+ commands), path sandbox, readonly validation |
+| Prompt cache boundary (`__DYNAMIC_BOUNDARY__`) | ✅ Static/dynamic prompt split |
+| Tool orchestration (parallel read, serial write) | ✅ Automatic partitioning |
+| max_output_tokens recovery | ✅ Auto-continue on truncation |
+| 413 prompt-too-long recovery | ✅ Reactive compact + retry |
+| Sub-agent spawning | ✅ Isolated context per sub-agent |
+| CLAUDE.md project instructions | ✅ Multi-level HARNESS.md (global → project → directory) |
+| Session memory | ✅ Auto-extract learnings, load next session |
+
+**Plus what Claude Code doesn't have:**
+
+| Feature | Claude Code | ClawHarness |
+|---|---|---|
+| Multi-model support | ❌ Anthropic only | ✅ Any OpenAI-compatible API |
+| Smart model routing | ❌ | ✅ Hard tasks → strong model, easy → cheap |
+| Open source | ❌ | ✅ MIT |
+| Cost | $100+/mo | **$5-20/mo** |
 
 ### The killer feature: Smart Model Routing
 
@@ -225,20 +258,24 @@ ClawHarness implements the core patterns that make Claude Code effective:
 
 When you combine a strong model (DeepSeek-R1 for reasoning) with this harness layer, you get **remarkably close to Claude Code's Opus-tier output** — at a fraction of the cost.
 
-## Use with Open Claw 🦞
+## The Open Claw 🦞 Harness
 
-ClawHarness is built for the **Open Claw ecosystem**. It provides the **multi-model engine layer** that the community needs:
+ClawHarness is the **core harness for the Open Claw ecosystem** — designed so that when you plug in cheap models, they perform as close to Claude Code's Opus tier as the underlying model allows.
 
-- **Any model** — swap Anthropic for DeepSeek, Doubao, Qwen, or local models
-- **Smart routing** — auto-route hard/easy tasks to strong/cheap models
-- **Real tool execution** — 22 tools that actually run, not stubs
-- **Production security** — 1,030 lines of command analysis
-- **Context compression** — 5 strategies so long sessions don't break
+The harness compensates for weaker models by:
 
-Works **standalone** or as the engine layer for any Open Claw project. If you're building on the open-source Claude Code harness ecosystem, this is the multi-model upgrade.
+1. **Better prompt engineering** — 224 lines of carefully structured system prompt with tool-specific behavioral guidance, length anchoring, and safety constraints
+2. **Smarter tool orchestration** — read-only tools run in parallel, writes run serially, results are automatically budgeted (large outputs saved to disk)
+3. **Context that never dies** — 5 compression strategies kick in automatically so the model always has relevant context, even in 100+ turn sessions
+4. **Error recovery** — truncated output auto-continues, 413 errors trigger emergency compression, failed tools get retried
+5. **Smart routing** — the hardest 20% of tasks go to a strong model, the easy 80% go to a cheap one
+
+**The better the harness, the less the model matters.** That's the thesis.
 
 ```bash
-npm install && DEEPSEEK_API_KEY=sk-xxx npx tsx src/index.ts
+# Strong model + cheap model = best of both worlds
+DEEPSEEK_API_KEY=sk-xxx DOUBAO_API_KEY=yyy \
+  npx tsx src/index.ts --model=deepseek --router=doubao
 ```
 
 ## Contributing

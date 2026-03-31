@@ -37,11 +37,21 @@ AgentEngine (state machine, 6 transition types)
 
 ## What Still Needs Work
 
-### High Priority
-1. Complete streaming tool executor integration
-2. More Bash security rules (find -exec nesting, etc.)
-3. MCP: HTTP/SSE transport, auth, config persistence
-4. Prompt cache boundary support (for Anthropic-compatible APIs)
+### 🔴 NEXT SESSION — CLI 美化 (参考 WaytoAGI-CLI 的效果)
+1. **ASCII art 启动画面** — 🦞 ClawHarness logo，带版本号、模型名、cwd
+2. **彩色输出美化** — 工具调用带颜色框、进度条、spinner 动画
+3. **Ink/React 终端 UI** — 用 ink 库做组件化终端渲染（CC 有 140+ 组件）
+4. **工具执行动画** — 执行中显示 spinner + 工具名，完成后显示 ✓/✗
+5. **Markdown 渲染** — 代码块高亮、表格对齐（用 marked-terminal 或 cli-highlight）
+6. **输入框美化** — 多行输入、历史记录、Tab 补全
+7. **npm 全局安装** — `npm install -g clawharness` 后直接输入 `clh` 启动
+8. 参考项目: https://github.com/AAAAAAAJ/WaytoAGI-CLI (它是直接抄的 CC 源码换了品牌，我们只参考它的 UI 效果不抄代码)
+
+### High Priority (code)
+9. Complete streaming tool executor integration
+10. More Bash security rules (find -exec nesting, etc.)
+11. MCP: HTTP/SSE transport, auth, config persistence
+12. Prompt cache boundary support (for Anthropic-compatible APIs)
 
 ### Medium Priority
 5. Ink/React terminal UI

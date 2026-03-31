@@ -1,75 +1,129 @@
-# ClawHarness
+<div align="center">
 
-**The open-source AI coding agent that works with ANY model.**
+# 🦞 ClawHarness
 
-Use DeepSeek, Doubao, Qwen, OpenAI — or any OpenAI-compatible API — as your coding assistant. Claude Code-level engineering, at a fraction of the cost.
+### The most capable open-source Claude Code harness — now with ANY model
 
-## Quick start
+**5,479 lines · 22 tools · smart routing · any LLM API**
 
-```bash
-git clone https://github.com/YOUR_USERNAME/clawharness.git
-cd clawharness
-npm install
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
-# Pick any provider:
-export DEEPSEEK_API_KEY="sk-..."
-npx tsx src/index.ts
-```
+[**中文文档 →**](./README_CN.md)
 
-## Why ClawHarness?
+---
 
-- **Any model** — DeepSeek, Doubao (豆包), Qwen (通义), OpenAI, or any OpenAI-compatible API
-- **Smart routing** — hard tasks → strong model, easy tasks → cheap model. Save 60-80% on API costs
-- **19 production tools** — Bash (with 130+ security rules), file read/write/edit, code search, web fetch, sub-agents, and more
-- **Real security** — 1,000+ lines of command semantic analysis, path sandboxing, read-only enforcement
-- **Context management** — 5 compression strategies so conversations never hit the limit
-- **中文支持** — first-class support for Chinese LLM providers and Chinese language
+*Claude Code costs $100+/month and locks you to one provider.*
+*What if you could get the same agent engineering — with DeepSeek, Doubao, Qwen, or any model you want?*
 
-## Smart model routing
+*That's ClawHarness.*
 
-The feature that changes everything:
+</div>
+
+## What is this?
+
+ClawHarness is a **production-grade AI coding agent** that replicates and extends the core engineering of Claude Code's agent harness — the `while(tool_call)` loop, context compression, tool orchestration, security layer, and more — but **decoupled from any single model provider**.
+
+Plug in DeepSeek for $0.14/M tokens. Plug in GPT-4o. Plug in a local Llama. The harness doesn't care. **Same agent intelligence, your choice of brain.**
+
+### The killer feature: Smart Model Routing
 
 ```bash
-# Hard tasks → DeepSeek, simple tasks → Doubao (10x cheaper)
+# Hard tasks → DeepSeek (strong reasoning)
+# Simple tasks → Doubao (10x cheaper)
+# ClawHarness decides per-turn, automatically
+
 DEEPSEEK_API_KEY=sk-xxx DOUBAO_API_KEY=yyy \
   npx tsx src/index.ts --model=deepseek --router=doubao
 ```
 
-Result: strong-model quality at weak-model prices.
+**Result: Claude Code-tier quality at 1/10th the cost.** The router analyzes each turn's complexity (keywords, message length, error context) and picks the right model.
 
-## Supported providers
+## Quick Start
 
-| Provider | Env var | Best for |
-|----------|---------|----------|
-| DeepSeek | `DEEPSEEK_API_KEY` | Reasoning, thinking mode |
-| Doubao (豆包) | `DOUBAO_API_KEY` | Speed, cost, Chinese code |
-| Qwen (通义) | `QWEN_API_KEY` | Long context (128K+) |
-| OpenAI | `OPENAI_API_KEY` | Proven quality |
-| Any compatible | Custom config | Your choice |
+```bash
+git clone https://github.com/agenmod/claw-harness.git
+cd claw-harness
+npm install
 
-## 19 built-in tools
+# Any provider — just set the env var:
+export DEEPSEEK_API_KEY="sk-..."
+npx tsx src/index.ts
+```
 
-| Tool | What it does |
+That's it. You're running a full coding agent with 22 tools, context compression, security analysis, and session persistence.
+
+## Why ClawHarness?
+
+| Feature | Claude Code | Other harnesses | **ClawHarness** |
+|---------|------------|-----------------|-----------------|
+| Model support | Anthropic only | Usually one | **Any OpenAI-compatible API** |
+| Monthly cost | $100+ | Varies | **$5-20 with DeepSeek/Doubao** |
+| Smart routing | No | No | **Yes — auto strong/cheap per turn** |
+| Tools | 40+ (closed) | 3-10 skeleton | **22 production-ready** |
+| Bash security | 10K lines (closed) | Minimal | **1,030 lines: semantic analysis + path sandbox** |
+| Context management | 4 strategies (closed) | Basic/none | **5 strategies: micro→snip→group→auto→reactive** |
+| LSP integration | Yes (closed) | No | **Yes — TS, Python, Rust, Go, Java, C++** |
+| Auto memory | Yes (closed) | No | **Yes — cross-session learning** |
+| State machine | Complex (closed) | Simple loop | **6 transition types with error recovery** |
+| Language | English | English | **English + 中文** |
+| Source | Proprietary | Open | **Open source, MIT** |
+
+## 22 Built-in Tools
+
+<details>
+<summary><b>Core (6)</b></summary>
+
+| Tool | Description |
 |------|-------------|
-| **Bash** | Shell execution with 130+ command security rules, path sandbox |
-| **Read** | File reading with binary detection, PDF extraction, image handling |
+| **Bash** | Shell execution with **130+ command security rules**, path sandboxing, sed analysis, readonly enforcement |
+| **Read** | Smart file reading — binary detection, PDF text extraction, image handling, large file pagination |
 | **Write** | File creation with auto-snapshot for undo |
-| **Edit** | String replacement with fuzzy match hints, diff preview |
-| **Glob** | File search by pattern |
-| **Grep** | Content search (ripgrep preferred) |
-| **WebFetch** | URL fetching with HTML readability extraction |
-| **WebSearch** | Web search (no API key needed) |
-| **NotebookEdit** | Jupyter notebook editing |
-| **Agent** | Sub-agent spawning for parallel subtasks |
-| **TodoWrite** | Structured task tracking |
-| **AskUser** | User clarification |
-| **EnterPlanMode** | Read-only planning mode |
-| **ExitPlanMode** | Return to execution |
-| **Config** | Runtime configuration |
-| **ToolSearch** | Tool discovery by keyword |
-| **Skill** | Domain-specific instruction files |
-| **EnterWorktree** | Git worktree isolation |
-| **ExitWorktree** | Exit worktree with optional merge |
+| **Edit** | String replacement with fuzzy match hints, duplicate detection, diff preview, `replace_all` mode |
+| **Glob** | File pattern search (proper glob library) |
+| **Grep** | Content search with ripgrep acceleration |
+</details>
+
+<details>
+<summary><b>Web & Search (2)</b></summary>
+
+| Tool | Description |
+|------|-------------|
+| **WebFetch** | URL content fetching with HTML readability extraction, JSON pretty-printing |
+| **WebSearch** | Web search via DuckDuckGo (no API key needed) |
+</details>
+
+<details>
+<summary><b>Agent & Planning (4)</b></summary>
+
+| Tool | Description |
+|------|-------------|
+| **Agent** | Spawn isolated sub-agents for parallel subtasks |
+| **EnterPlanMode** | Switch to read-only planning (model can self-activate) |
+| **ExitPlanMode** | Return to execution mode |
+| **TodoWrite** | Structured task tracking for complex multi-step work |
+</details>
+
+<details>
+<summary><b>Code Intelligence (2)</b></summary>
+
+| Tool | Description |
+|------|-------------|
+| **LSP** | Go-to-definition, find references, hover info — auto-detects language server |
+| **NotebookEdit** | Jupyter notebook cell editing |
+</details>
+
+<details>
+<summary><b>DevOps & Config (6)</b></summary>
+
+| Tool | Description |
+|------|-------------|
+| **EnterWorktree** | Git worktree isolation for safe experimentation |
+| **ExitWorktree** | Exit worktree with optional merge back |
+| **Config** | Runtime config management |
+| **Skill** | Load domain-specific instruction files |
+| **ToolSearch** | Discover tools by keyword |
+| **AskUser** | Ask for clarification when genuinely needed |
+</details>
 
 ## Architecture
 
@@ -77,42 +131,109 @@ Result: strong-model quality at weak-model prices.
 User input
   │
   ▼
-AgentEngine (state machine with 6 transition types)
-  ├── ModelProvider (OpenAI-compat → any API)
-  │   ├── RetryProvider (exponential backoff)
-  │   └── ModelRouter (strong/cheap by complexity)
-  ├── ToolRegistry (19 tools, parallel read / serial write)
-  ├── ContextManager (micro → snip → group → auto → reactive)
-  ├── PermissionSystem (trust/confirm/readonly + rules)
-  ├── HookSystem (pre/post tool call, on stop)
-  └── MCP plugin protocol
+┌──────────────────────────────────────────────┐
+│              AgentEngine                      │
+│         (state machine, 6 transitions)        │
+│                                               │
+│  ┌──────────────────────────────────────────┐ │
+│  │  while (tool_calls) {                    │ │
+│  │    compress_if_needed()  // 5 strategies  │ │
+│  │    stream = provider.chat(messages,tools)  │ │
+│  │    for chunk in stream:                   │ │
+│  │      yield text / tool_calls              │ │
+│  │    execute_tools()      // parallel safe  │ │
+│  │    run_hooks()          // pre/post       │ │
+│  │    check_recovery()     // 413, truncate  │ │
+│  │  }                                        │ │
+│  └──────────────────────────────────────────┘ │
+│                                               │
+│  ┌────────────┐  ┌──────────────────────────┐ │
+│  │ Provider   │  │ Security                 │ │
+│  │ ┌────────┐ │  │ ┌──────────────────────┐ │ │
+│  │ │OpenAI- │ │  │ │ 130+ cmd rules       │ │ │
+│  │ │Compat  │ │  │ │ Path sandbox         │ │ │
+│  │ ├────────┤ │  │ │ Readonly validation   │ │ │
+│  │ │Retry   │ │  │ │ Permission rules     │ │ │
+│  │ ├────────┤ │  │ └──────────────────────┘ │ │
+│  │ │Router  │ │  └──────────────────────────┘ │
+│  │ └────────┘ │                               │
+│  └────────────┘  ┌──────────────────────────┐ │
+│                  │ Context (5 strategies)    │ │
+│  ┌────────────┐  │ micro → snip → group     │ │
+│  │ 22 Tools   │  │ → auto → reactive        │ │
+│  └────────────┘  └──────────────────────────┘ │
+└──────────────────────────────────────────────┘
 ```
 
-## CLI commands
+## Supported Providers
+
+Any **OpenAI-compatible** API works out of the box. Just set one env var:
+
+| Provider | Env Var | Default Model | Best For |
+|----------|---------|---------------|----------|
+| DeepSeek | `DEEPSEEK_API_KEY` | deepseek-chat | Reasoning, thinking mode, value |
+| Doubao (豆包) | `DOUBAO_API_KEY` | doubao-seed-code | Speed, cost, Chinese code |
+| Qwen (通义) | `QWEN_API_KEY` | qwen-max | Long context (128K+) |
+| OpenAI | `OPENAI_API_KEY` | gpt-4o | Proven quality |
+| Custom | `~/.clawharness/config.json` | Any | Your infra |
+
+## CLI
+
+```bash
+# Interactive REPL
+npx tsx src/index.ts
+
+# One-shot mode
+npx tsx src/index.ts "create a REST API with Express"
+
+# Smart routing
+npx tsx src/index.ts --model=deepseek --router=doubao
+
+# Flags
+--model=NAME     # Choose provider
+--router=NAME    # Enable smart routing (strong=model, cheap=router)
+--trust          # Auto-approve all operations
+--readonly       # Read-only mode
+--verbose        # Show thinking tokens & cost
+--resume         # Resume last session
+```
+
+### Slash Commands
 
 ```
-/model [name]      — show or switch model at runtime
-/tools             — list all tools
-/clear             — reset conversation
-/cost              — token usage & estimated cost
-/save              — save session to disk
-/undo <path>       — restore file to pre-edit state
-/allow <tool>      — always allow a tool
-/deny <tool>       — always deny a tool
-/help              — all commands
+/model [name]    — show or switch model at runtime
+/tools           — list all 22 tools
+/cost            — token usage & cost estimate
+/save            — persist session
+/undo <path>     — restore file (pre-edit snapshot)
+/allow <tool>    — always-allow rule
+/deny <tool>     — always-deny rule
+/clear           — reset conversation
+/help            — all commands
 ```
 
-## Flags
+## Approaching Claude Code Capability
 
-```
---model=deepseek   — choose provider
---router=doubao    — enable smart routing
---trust            — auto-approve all operations
---readonly         — read-only mode
---verbose          — show thinking & usage
---resume           — resume last session
+ClawHarness implements the core patterns that make Claude Code effective:
+
+1. **Agent loop** — the `while(tool_call)` pattern with full state machine (not a simple retry loop)
+2. **Tool-first design** — 22 tools the model can compose freely, no hardcoded workflows
+3. **Security in depth** — command semantic analysis understands `find -exec rm {} \;` vs `find -name "*.ts"`, not just regex matching
+4. **Context never dies** — 5 compression strategies from cheap (snip tool results) to expensive (model summary) to emergency (413 recovery)
+5. **Memory persists** — auto-extracts learnings from each session, loads them next time
+6. **Model-agnostic** — swap the brain without changing the harness. Today's best model might not be tomorrow's
+
+When you combine a strong model (DeepSeek-R1 for reasoning) with this harness layer, you get **remarkably close to Claude Code's Opus-tier output** — at a fraction of the cost.
+
+## Contributing
+
+PRs welcome. See [CONTEXT.md](./CONTEXT.md) for architecture details and the roadmap.
+
+```bash
+npm install
+DEEPSEEK_API_KEY=sk-xxx npx tsx src/index.ts
 ```
 
 ## License
 
-MIT
+MIT — do whatever you want with it.

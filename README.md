@@ -278,6 +278,122 @@ DEEPSEEK_API_KEY=sk-xxx DOUBAO_API_KEY=yyy \
   npx tsx src/index.ts --model=deepseek --router=doubao
 ```
 
+## Use with any IDE (MCP Server)
+
+ClawHarness runs as an **MCP server** — any MCP-compatible IDE or tool can connect instantly. No plugin development needed.
+
+```bash
+# Start MCP server
+clh --mcp-server
+```
+
+### Cursor
+
+`~/.cursor/mcp.json`:
+```json
+{
+  "mcpServers": {
+    "clawharness": {
+      "command": "npx",
+      "args": ["tsx", "/path/to/clawharness/src/entrypoints/mcp-server.ts"]
+    }
+  }
+}
+```
+
+### VSCode + Continue.dev
+
+`~/.continue/config.json`:
+```json
+{
+  "experimental": {
+    "modelContextProtocolServers": [{
+      "transport": {
+        "type": "stdio",
+        "command": "npx",
+        "args": ["tsx", "/path/to/clawharness/src/entrypoints/mcp-server.ts"]
+      }
+    }]
+  }
+}
+```
+
+### VSCode + Cline
+
+Settings → MCP Servers → Add Server:
+- Command: `npx`
+- Args: `tsx /path/to/clawharness/src/entrypoints/mcp-server.ts`
+
+### Cherry Studio
+
+Settings → MCP Servers → Add:
+- Type: stdio
+- Command: `npx tsx /path/to/clawharness/src/entrypoints/mcp-server.ts`
+
+### Claude Desktop
+
+`~/Library/Application Support/Claude/claude_desktop_config.json`:
+```json
+{
+  "mcpServers": {
+    "clawharness": {
+      "command": "npx",
+      "args": ["tsx", "/path/to/clawharness/src/entrypoints/mcp-server.ts"]
+    }
+  }
+}
+```
+
+### Windsurf
+
+MCP settings → Add server with the same command.
+
+### MCP Tools Exposed
+
+| Tool | Description |
+|------|-------------|
+| `claw_run` | Full agent loop — give it a task, it uses all 22 tools |
+| `claw_search` | Search code with ripgrep |
+| `claw_read` | Read file with line numbers |
+| `claw_edit` | Edit file (string replacement) |
+| `claw_bash` | Run shell command |
+
+## SDK / Programmatic API
+
+Use ClawHarness from your own code:
+
+```typescript
+import { createSession } from 'clawharness/sdk'
+
+const session = createSession({
+  provider: 'deepseek',
+  apiKey: process.env.DEEPSEEK_API_KEY,
+})
+
+// Run a task
+const result = await session.run("create a REST API with Express")
+console.log(result.text)
+
+// Or stream events
+for await (const event of session.stream("fix the bug in app.ts")) {
+  if (event.type === 'text') process.stdout.write(event.content)
+  if (event.type === 'tool_done') console.log(`[${event.call.name}] done`)
+}
+```
+
+### CLI SDK Modes
+
+```bash
+# One-shot text output (like CC's -p flag)
+clh --print "create hello.py"
+
+# One-shot JSON output
+clh --json "create hello.py"
+
+# Pipe mode (stdin JSON → stdout JSON)
+echo '{"prompt":"create hello.py"}' | clh --pipe
+```
+
 ## Contributing
 
 PRs welcome. See [CONTEXT.md](./CONTEXT.md) for architecture details and the roadmap.

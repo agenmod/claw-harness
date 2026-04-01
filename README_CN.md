@@ -154,6 +154,54 @@ DEEPSEEK_API_KEY=sk-xxx DOUBAO_API_KEY=yyy \
   npx tsx src/index.ts --model=deepseek --router=doubao
 ```
 
+## 接入任何 IDE（MCP Server 模式）
+
+ClawHarness 可以作为 **MCP 服务器** 运行——任何支持 MCP 的 IDE 都能直接接入，不需要开发插件。
+
+```bash
+clh --mcp-server
+```
+
+| IDE / 工具 | 支持方式 |
+|-----------|---------|
+| **Cursor** | 原生 MCP → `~/.cursor/mcp.json` |
+| **VSCode + Continue.dev** | Continue 配置文件 |
+| **VSCode + Cline** | Cline 设置→MCP 服务器 |
+| **Cherry Studio** | 设置→MCP 服务器 |
+| **Claude Desktop** | `claude_desktop_config.json` |
+| **Windsurf** | MCP 设置 |
+
+配置示例（以 Cursor 为例）：
+```json
+{
+  "mcpServers": {
+    "clawharness": {
+      "command": "npx",
+      "args": ["tsx", "你的路径/clawharness/src/entrypoints/mcp-server.ts"]
+    }
+  }
+}
+```
+
+配完后在 IDE 里就能调用 `claw_run`（完整 Agent）、`claw_search`、`claw_read`、`claw_edit`、`claw_bash`，背后跑的是你的多模型+智能路由。
+
+## SDK / 编程接口
+
+```typescript
+import { createSession } from 'clawharness/sdk'
+
+const session = createSession({ provider: 'deepseek', apiKey: 'sk-xxx' })
+const result = await session.run("创建一个 Express API")
+console.log(result.text)
+```
+
+命令行 SDK 模式：
+```bash
+clh --print "创建 hello.py"                        # 纯文本输出
+clh --json "创建 hello.py"                          # JSON 输出
+echo '{"prompt":"创建 hello.py"}' | clh --pipe       # 管道 JSON
+```
+
 ## 许可
 
 MIT — 随便用。

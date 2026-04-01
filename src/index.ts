@@ -56,8 +56,36 @@ function buildProvider(name: string, cfg: ProviderConfig): ModelProvider {
   })
 }
 
-function main() {
+async function main() {
   const args = process.argv.slice(2)
+
+  // ── SDK / MCP modes (bypass normal CLI) ──
+  if (args.includes('--mcp-server') || args.includes('--mcp')) {
+    const { startMcpServer } = await import('./entrypoints/mcp-server.js')
+    startMcpServer()
+    return
+  }
+  if (args.includes('--pipe')) {
+    const { runPipeMode } = await import('./entrypoints/sdk.js')
+    await runPipeMode()
+    return
+  }
+  if (args.includes('--print') || args.includes('-p')) {
+    const prompt = args.filter(a => !a.startsWith('-')).join(' ')
+    if (!prompt) { console.error('Usage: clh --print "your prompt"'); process.exit(1) }
+    const { runPrintMode } = await import('./entrypoints/sdk.js')
+    await runPrintMode(prompt)
+    return
+  }
+  if (args.includes('--json')) {
+    const prompt = args.filter(a => !a.startsWith('-')).join(' ')
+    if (!prompt) { console.error('Usage: clh --json "your prompt"'); process.exit(1) }
+    const { createSession } = await import('./entrypoints/sdk.js')
+    const result = await createSession({ permissionMode: 'trust' }).run(prompt)
+    process.stdout.write(JSON.stringify(result, null, 2) + '\n')
+    return
+  }
+
   const modelFlag = args.find(a => a.startsWith('--model='))?.split('=')[1]
   const routerFlag = args.find(a => a.startsWith('--router='))?.split('=')[1]
   const resumeFlag = args.find(a => a.startsWith('--resume'))
